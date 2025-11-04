@@ -1,0 +1,30 @@
+#!/bin/sh
+
+set -x
+
+podman pod create --name my-postgraphile -p 8080:8080 --userns=keep-id;
+
+podman volume create my_postgraphile_data;
+
+podman run --name my-postgraphile-db \
+            -e POSTGRES_PASSWORD=postgre108 \
+            -e POSTGRES_USER=postgraphile \
+            -e POSTGRES_DB=postgraphile \
+            --pod my-postgraphile \
+            -v ./db-vol:/var/lib/postgresql/data \
+            -d \
+            postgres:16;
+
+podman build -t my-postgraphile-app ./app;
+
+podman run --name my-postgraphile-app \
+            --pod my-postgraphile \
+            -v ./volume:/home/app/volume:Z \
+            -e DATABASE_URL=postgres://postgraphile:postgre108@localhost:5432/postgraphile \
+            -e GRAPHILE_ENABLE_CONSOLE=true \
+            -e GRAPHILE_ENABLE_GRAPHIQL=true \
+            -e GRAPHILE_SCHEMA=public \
+            -d \
+            my-postgraphile-app sleep infinity;
+
+podman generate kube my-postgraphile > my-postgraphile-pod.yaml;
