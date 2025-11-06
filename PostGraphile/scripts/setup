@@ -32,6 +32,7 @@ podman run --name my-postgraphile-app \
     -e GRAPHILE_ENABLE_GRAPHIQL=true \
     -e GRAPHILE_SCHEMA=public \
     --pod my-postgraphile \
+    --init
     -d \
     my-postgraphile-app sleep infinity;
 
