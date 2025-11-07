@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Setup with separate containers, network and volume for data persistence
+
+set -x
+
+podman network create my-postgraphile-net;
+
+podman volume create my_postgraphile_data;
+
+podman run \
+    --name my-postgraphile-db \
+    -e POSTGRES_PASSWORD=postgre108 \
+    -e POSTGRES_USER=postgraphile \
+    -e POSTGRES_DB=postgraphile \
+    -v my_postgraphile_data:/var/lib/postgresql/data:Z \
+    --network my-postgraphile-net \
+    -d \
+    postgres:16;
+
+podman build -t my-postgraphile-app ./app;
+
+podman run \
+    --name my-postgraphile-app \
+    --network my-postgraphile-net \
+    --userns=keep-id \
+    --init \
+    -it \
+    --rm \
+    --workdir /home/node/app \
+    -v ./volume:/home/node/app/volume:Z \
+    -e DATABASE_URL=postgres://postgraphile:postgre108@db:5432/postgraphile \
+    -e GRAPHILE_ENABLE_CONSOLE=true \
+    -e GRAPHILE_ENABLE_GRAPHIQL=true \
+    -e GRAPHILE_SCHEMA=public \
+    my-postgraphile-app bash;
+
+podman container stop my-postgraphile-app;
+podman container rm my-postgraphile-app;
+
+podman container stop my-postgraphile-db;
+podman container rm my-postgraphile-db;
+
+podman network rm my-postgraphile-net;
