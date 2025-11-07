@@ -7,10 +7,11 @@ kind: Pod
 metadata:
   annotations:
     bind-mount-options: /home/andriy/dev/automatic-api-playground/PostGraphile/volume:Z
-    io.kubernetes.cri-o.SandboxID/my-postgraphile-app: 5931eccfe45decd6cdbfc4831e7f0d06030b05ca3c51d178cb7f5661cf2db17b
-    io.kubernetes.cri-o.SandboxID/my-postgraphile-db: 5931eccfe45decd6cdbfc4831e7f0d06030b05ca3c51d178cb7f5661cf2db17b
+    io.kubernetes.cri-o.SandboxID/my-postgraphile-adminer: c01d5774d3a2410110622fda059f39ba06b34ac9573c31fdf4f5c74ebd7400ba
+    io.kubernetes.cri-o.SandboxID/my-postgraphile-app: c01d5774d3a2410110622fda059f39ba06b34ac9573c31fdf4f5c74ebd7400ba
+    io.kubernetes.cri-o.SandboxID/my-postgraphile-db: c01d5774d3a2410110622fda059f39ba06b34ac9573c31fdf4f5c74ebd7400ba
     io.podman.annotations.userns: keep-id
-  creationTimestamp: "2025-11-07T12:56:02Z"
+  creationTimestamp: "2025-11-07T13:25:27Z"
   labels:
     app: my-postgraphile
   name: my-postgraphile
@@ -19,15 +20,17 @@ spec:
   - args:
     - postgres
     env:
-    - name: POSTGRES_DB
-      value: postgraphile
     - name: POSTGRES_PASSWORD
       value: postgre108
     - name: POSTGRES_USER
       value: postgraphile
+    - name: POSTGRES_DB
+      value: postgraphile
     image: docker.io/library/postgres:16
     name: my-postgraphile-db
     ports:
+    - containerPort: 5678
+      hostPort: 5678
     - containerPort: 8080
       hostPort: 8080
     securityContext:
@@ -40,14 +43,16 @@ spec:
     - sleep
     - infinity
     env:
-    - name: GRAPHILE_SCHEMA
-      value: public
-    - name: GRAPHILE_ENABLE_CONSOLE
-      value: "true"
     - name: GRAPHILE_ENABLE_GRAPHIQL
       value: "true"
+    - name: GRAPHILE_ENABLE_CONSOLE
+      value: "true"
+    - name: GRAPHILE_SCHEMA
+      value: public
     - name: DATABASE_URL
       value: postgres://postgraphile:postgre108@localhost:5432/postgraphile
+    - name: GRAPHILE_ENV
+      value: development
     image: localhost/my-postgraphile-app:latest
     name: my-postgraphile-app
     securityContext: {}
@@ -55,14 +60,23 @@ spec:
     - mountPath: /home/node/app/volume
       name: home-andriy-dev-automatic-api-playground-postgraphile-volume-host-0
     workingDir: /home/node/app
+  - args:
+    - php
+    - -S
+    - '[::]:8080'
+    - -t
+    - /var/www/html
+    image: docker.io/library/adminer:latest
+    name: my-postgraphile-adminer
+    securityContext: {}
   hostUsers: false
   volumes:
-  - hostPath:
-      path: /home/andriy/dev/automatic-api-playground/PostGraphile/volume
-      type: Directory
-    name: home-andriy-dev-automatic-api-playground-postgraphile-volume-host-0
   - hostPath:
       path: /home/andriy/dev/automatic-api-playground/PostGraphile/my_postgraphile_data
       type: Directory
     name: home-andriy-dev-automatic-api-playground-postgraphile-my-postgraphile-data-host-0
+  - hostPath:
+      path: /home/andriy/dev/automatic-api-playground/PostGraphile/volume
+      type: Directory
+    name: home-andriy-dev-automatic-api-playground-postgraphile-volume-host-0
 
