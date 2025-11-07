@@ -6,10 +6,11 @@ apiVersion: v1
 kind: Pod
 metadata:
   annotations:
-    io.kubernetes.cri-o.SandboxID/my-postgraphile-app: 927c84ba82bcd9b7a0c17270ea11ca04ea838c2f127166fea5ded0e7aea5625a
-    io.kubernetes.cri-o.SandboxID/my-postgraphile-db: 927c84ba82bcd9b7a0c17270ea11ca04ea838c2f127166fea5ded0e7aea5625a
+    bind-mount-options: /home/andriy/dev/automatic-api-playground/PostGraphile/volume:Z
+    io.kubernetes.cri-o.SandboxID/my-postgraphile-app: 5931eccfe45decd6cdbfc4831e7f0d06030b05ca3c51d178cb7f5661cf2db17b
+    io.kubernetes.cri-o.SandboxID/my-postgraphile-db: 5931eccfe45decd6cdbfc4831e7f0d06030b05ca3c51d178cb7f5661cf2db17b
     io.podman.annotations.userns: keep-id
-  creationTimestamp: "2025-11-04T21:23:15Z"
+  creationTimestamp: "2025-11-07T12:56:02Z"
   labels:
     app: my-postgraphile
   name: my-postgraphile
@@ -18,11 +19,11 @@ spec:
   - args:
     - postgres
     env:
+    - name: POSTGRES_DB
+      value: postgraphile
     - name: POSTGRES_PASSWORD
       value: postgre108
     - name: POSTGRES_USER
-      value: postgraphile
-    - name: POSTGRES_DB
       value: postgraphile
     image: docker.io/library/postgres:16
     name: my-postgraphile-db
@@ -34,25 +35,34 @@ spec:
       runAsUser: 1000
     volumeMounts:
     - mountPath: /var/lib/postgresql/data
-      name: my-postgraphile-data-pvc
+      name: home-andriy-dev-automatic-api-playground-postgraphile-my-postgraphile-data-host-0
   - args:
     - sleep
     - infinity
     env:
+    - name: GRAPHILE_SCHEMA
+      value: public
     - name: GRAPHILE_ENABLE_CONSOLE
       value: "true"
     - name: GRAPHILE_ENABLE_GRAPHIQL
       value: "true"
     - name: DATABASE_URL
       value: postgres://postgraphile:postgre108@localhost:5432/postgraphile
-    - name: GRAPHILE_SCHEMA
-      value: public
     image: localhost/my-postgraphile-app:latest
     name: my-postgraphile-app
     securityContext: {}
+    volumeMounts:
+    - mountPath: /home/node/app/volume
+      name: home-andriy-dev-automatic-api-playground-postgraphile-volume-host-0
+    workingDir: /home/node/app
   hostUsers: false
   volumes:
-  - name: my-postgraphile-data-pvc
-    persistentVolumeClaim:
-      claimName: my-postgraphile-data
+  - hostPath:
+      path: /home/andriy/dev/automatic-api-playground/PostGraphile/volume
+      type: Directory
+    name: home-andriy-dev-automatic-api-playground-postgraphile-volume-host-0
+  - hostPath:
+      path: /home/andriy/dev/automatic-api-playground/PostGraphile/my_postgraphile_data
+      type: Directory
+    name: home-andriy-dev-automatic-api-playground-postgraphile-my-postgraphile-data-host-0
 

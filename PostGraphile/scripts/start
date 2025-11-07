@@ -9,11 +9,6 @@ podman pod create \
   --userns=keep-id \
   -p 8080:8080 ;
 
-# podman network create my-postgraphile-net;
-            # --network my-postgraphile-net \
-
-# podman volume create my_postgraphile_data;
-
 podman run --name my-postgraphile-db \
     -e POSTGRES_PASSWORD=postgre108 \
     -e POSTGRES_USER=postgraphile \
@@ -32,8 +27,13 @@ podman run --name my-postgraphile-app \
     -e GRAPHILE_ENABLE_GRAPHIQL=true \
     -e GRAPHILE_SCHEMA=public \
     --pod my-postgraphile \
-    --init
+    --workdir /home/node/app \
+    --init \
     -d \
     my-postgraphile-app sleep infinity;
 
 podman generate kube my-postgraphile > my-postgraphile-pod.yaml;
+
+podman exec -it my-postgraphile-app bash;
+podman pod stop my-postgraphile;
+podman pod rm my-postgraphile;
