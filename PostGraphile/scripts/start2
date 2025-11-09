@@ -25,15 +25,13 @@ podman run \
     --network my-postgraphile-net \
     --userns=keep-id \
     --init \
-    -it \
-    --rm \
     --workdir /home/node/app \
     -v ./volume:/home/node/app/volume:Z \
     -e DATABASE_URL=postgres://postgraphile:postgre108@db:5432/postgraphile \
     -e GRAPHILE_ENABLE_CONSOLE=true \
     -e GRAPHILE_ENABLE_GRAPHIQL=true \
     -e GRAPHILE_SCHEMA=public \
-    my-postgraphile-app bash;
+    my-postgraphile-app;
 
 podman container stop my-postgraphile-app;
 podman container rm my-postgraphile-app;

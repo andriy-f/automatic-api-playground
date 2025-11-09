@@ -42,7 +42,7 @@ podman run \
     -d \
     adminer;
 
-podman generate kube my-postgraphile > my-postgraphile-pod.yaml;
+# podman generate kube my-postgraphile > my-postgraphile-pod.yaml;
 
 podman exec -it my-postgraphile-app bash;
 
