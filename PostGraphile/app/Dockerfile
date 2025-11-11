@@ -21,5 +21,8 @@ RUN pnpm fetch
 
 COPY --chown=node:node package.json ./
 RUN pnpm install --offline
+COPY --chown=node:node tsconfig.json ./
+COPY --chown=node:node src ./src
+RUN pnpm run build
 
 CMD ["pnpm", "dlx", "postgraphile", "-P", "postgraphile/presets/amber", "-e", "-c", "$DATABASE_URL"]

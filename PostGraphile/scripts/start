@@ -25,6 +25,7 @@ podman build -t my-postgraphile-app ./app;
 podman run \
     --name my-postgraphile-app \
     -v ./volume:/home/node/app/volume:Z \
+    -v ./app/src:/home/node/app/src:Z \
     -e DATABASE_URL=postgres://postgraphile:postgre108@localhost:5432/postgraphile \
     -e GRAPHILE_ENV=development \
     -e GRAPHILE_ENABLE_CONSOLE=true \

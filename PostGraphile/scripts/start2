@@ -27,6 +27,7 @@ podman run \
     --init \
     --workdir /home/node/app \
     -v ./volume:/home/node/app/volume:Z \
+    -v ./app/src:/home/node/app/src:Z \
     -e DATABASE_URL=postgres://postgraphile:postgre108@db:5432/postgraphile \
     -e GRAPHILE_ENABLE_CONSOLE=true \
     -e GRAPHILE_ENABLE_GRAPHIQL=true \
