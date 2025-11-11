@@ -22,7 +22,10 @@ serv.addTo(fastify).catch((e) => {
 
 // Run the server!
 try {
-    await fastify.listen({ port: port })
+    await fastify.listen({
+        port: port,
+        host: '0.0.0.0'
+    })
 } catch (err) {
     fastify.log.error(err)
     process.exit(1)
