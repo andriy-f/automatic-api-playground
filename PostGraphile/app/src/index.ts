@@ -1,6 +1,6 @@
 import { grafserv } from "postgraphile/grafserv/fastify/v4";
-import { pgl } from "./pgl.js";
 import Fastify from 'fastify'
+import { pgl } from "./pgl.ts";
 import { port } from "./graphile.config.mts";
 
 const serv = pgl.createServ(grafserv);
