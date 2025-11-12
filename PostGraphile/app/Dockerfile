@@ -22,13 +22,14 @@ COPY --chown=node:node pnpm-lock.yaml ./
 RUN pnpm fetch
 
 COPY --chown=node:node package.json ./
+RUN corepack install
 RUN pnpm install --offline
 COPY --chown=node:node tsconfig.json ./
 COPY --chown=node:node src ./src
 RUN pnpm run build
 
 ENV NODE_ENV=development
-CMD ["node", "/src/index.ts"]
+CMD ["node", "./src/index.ts"]
 
 FROM base AS production
 
@@ -39,4 +40,4 @@ COPY --chown=node:node --from=build /home/node/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /home/node/app/build ./build
 
 ENV NODE_ENV=production
-CMD ["node", "/build/index.js"]
+CMD ["node", "./build/index.js"]
