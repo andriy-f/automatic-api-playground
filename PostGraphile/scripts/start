@@ -20,7 +20,17 @@ podman run \
     -d \
     postgres:16;
 
-podman build -t my-postgraphile-app ./app;
+podman run \
+    --name my-postgraphile-adminer \
+    --pod my-postgraphile \
+    -d \
+    adminer;
+
+podman build \
+  --no-cache \
+  -t my-postgraphile-app \
+  --target=build \
+  ./app;
 
 podman run \
     --name my-postgraphile-app \
@@ -34,18 +44,12 @@ podman run \
     --pod my-postgraphile \
     --workdir /home/node/app \
     --init \
-    -d \
-    my-postgraphile-app sleep infinity;
-
-podman run \
-    --name my-postgraphile-adminer \
-    --pod my-postgraphile \
-    -d \
-    adminer;
+    -it \
+    my-postgraphile-app;
 
 # podman generate kube my-postgraphile > my-postgraphile-pod.yaml;
 
-podman exec -it my-postgraphile-app bash;
+# podman exec -it my-postgraphile-app bash;
 
 podman pod stop my-postgraphile;
 podman pod rm my-postgraphile;
