@@ -1,4 +1,4 @@
-FROM node:24-slim 
+FROM node:24-slim AS base
 
 USER root
 
@@ -16,6 +16,8 @@ RUN corepack enable --install-directory $MY_BIN_DIR pnpm \
 
 WORKDIR /home/node/app
 
+FROM base AS build
+
 COPY --chown=node:node pnpm-lock.yaml ./
 RUN pnpm fetch
 
@@ -25,4 +27,16 @@ COPY --chown=node:node tsconfig.json ./
 COPY --chown=node:node src ./src
 RUN pnpm run build
 
-CMD ["pnpm", "dlx", "postgraphile", "-P", "postgraphile/presets/amber", "-e", "-c", "$DATABASE_URL"]
+ENV NODE_ENV=development
+CMD ["node", "/src/index.ts"]
+
+FROM base AS production
+
+COPY --chown=node:node pnpm-lock.yaml ./
+COPY --chown=node:node package.json ./
+# TODO use slimmer node_modules for production
+COPY --chown=node:node --from=build /home/node/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /home/node/app/build ./build
+
+ENV NODE_ENV=production
+CMD ["node", "/build/index.js"]
