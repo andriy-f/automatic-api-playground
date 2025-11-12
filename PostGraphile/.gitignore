@@ -2,3 +2,7 @@
 /volume
 /app/node_modules
 /app/build
+/app/.env
+/db/.env
+/db/db-data
+/db/pass_file

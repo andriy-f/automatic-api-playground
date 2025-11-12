@@ -4,6 +4,13 @@
 
 set -x
 
+mkdir -p ./db/db-data
+if [ ! -f ./db/.env ]; then cp ./db/template.env ./db/.env; fi
+if [ ! -f ./db/pass_file ]; then cp ./db/pass_file.template ./db/pass_file; fi
+if [ ! -f ./app/.env ]; then cp ./app/template.env ./app/.env; fi
+
+podman secret create pg_pass ./db/pass_file
+
 podman pod create \
   --name my-postgraphile \
   --userns=keep-id \
@@ -12,10 +19,9 @@ podman pod create \
 
 podman run \
     --name my-postgraphile-db \
-    -e POSTGRES_PASSWORD=postgre108 \
-    -e POSTGRES_USER=postgraphile \
-    -e POSTGRES_DB=postgraphile \
-    -v $PWD/my_postgraphile_data:/var/lib/postgresql/data:Z \
+    --env-file ./db/.env \
+    --secret=pg_pass \
+    -v $PWD/db/db-data:/var/lib/postgresql/data:Z \
     --pod my-postgraphile \
     -d \
     postgres:16;
@@ -27,8 +33,7 @@ podman run \
     adminer;
 
 podman build \
-  --no-cache \
-  -t my-postgraphile-app \
+  --tag my-postgraphile-app \
   --target=build \
   ./app;
 
@@ -36,13 +41,8 @@ podman run \
     --name my-postgraphile-app \
     -v ./volume:/home/node/app/volume:Z \
     -v ./app/src:/home/node/app/src:Z \
-    -e DATABASE_URL=postgres://postgraphile:postgre108@localhost:5432/postgraphile \
-    -e GRAPHILE_ENV=development \
-    -e GRAPHILE_ENABLE_CONSOLE=true \
-    -e GRAPHILE_ENABLE_GRAPHIQL=true \
-    -e GRAPHILE_SCHEMA=public \
+    --env-file ./app/.env \
     --pod my-postgraphile \
-    --workdir /home/node/app \
     --init \
     -it \
     my-postgraphile-app;
@@ -53,3 +53,4 @@ podman run \
 
 podman pod stop my-postgraphile;
 podman pod rm my-postgraphile;
+podman secret rm pg_pass;
