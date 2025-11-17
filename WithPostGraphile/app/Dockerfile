@@ -29,7 +29,7 @@ COPY --chown=node:node src ./src
 RUN pnpm run build
 
 ENV NODE_ENV=development
-CMD ["node", "./src/index.ts"]
+CMD ["node", "--watch", "./src/index.ts"]
 
 FROM base AS production
 
