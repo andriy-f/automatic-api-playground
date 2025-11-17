@@ -1,5 +1,3 @@
-import { get } from "postgraphile/grafast";
-
 const requireEnv = (varName: string): string => {
     const value = process.env[varName];
     if (!value) {
@@ -27,9 +25,13 @@ const getEnvInt = (varName: string): number | null => {
 const port = getEnvInt('PORT') ?? 5678;
 const host = getEnv('HOST') ?? 'localhost'; // 0.0.0.0 for all interfaces, localhost for local only
 const db_url = requireEnv('DATABASE_URL');
+const node_env = getEnv('NODE_ENV') ?? 'development';
+const is_dev = node_env === 'development';
 
 export default {
     port,
     host,
-    db_url
+    db_url,
+    node_env,
+    is_dev
 };

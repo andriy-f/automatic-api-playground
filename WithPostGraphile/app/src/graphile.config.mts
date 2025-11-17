@@ -10,7 +10,13 @@ const preset: GraphileConfig.Preset = {
         // Uncomment this to opt into a smaller Relay-focussed schema
         //PostGraphileRelayPreset,
     ],
-    pgServices: [makePgService({ connectionString: config.db_url })],
+    pgServices: [makePgService({
+        connectionString: config.db_url,
+    })],
+    grafserv: {
+        graphiql: config.is_dev,
+        watch: config.is_dev,
+    }
 };
 
 export default preset;
