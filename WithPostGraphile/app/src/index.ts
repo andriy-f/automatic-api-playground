@@ -1,9 +1,9 @@
 import { grafserv } from "postgraphile/grafserv/fastify/v4";
 import Fastify from 'fastify'
 import { pgl } from "./pgl.ts";
-import { port } from "./graphile.config.mts";
+import config from "./config.ts"
 
-const serv = pgl.createServ(grafserv);
+const server = pgl.createServ(grafserv);
 
 // Import the framework and instantiate it
 const fastify = Fastify({
@@ -15,7 +15,7 @@ fastify.get('/hello-world', async function handler(request, reply) {
     return { hello: 'world' }
 })
 
-serv.addTo(fastify).catch((e) => {
+server.addTo(fastify).catch((e) => {
     console.error(e);
     process.exit(1);
 });
@@ -23,8 +23,8 @@ serv.addTo(fastify).catch((e) => {
 // Run the server!
 try {
     await fastify.listen({
-        port: port,
-        host: '0.0.0.0'
+        port: config.port,
+        host: config.host
     })
 } catch (err) {
     fastify.log.error(err)
