@@ -24,7 +24,7 @@ podman run \
     -v $PWD/db/db-data:/var/lib/postgresql/data:Z \
     --pod my-postgraphile \
     -d \
-    postgres:16;
+    postgres:17;
 
 podman run \
     --name my-postgraphile-adminer \
