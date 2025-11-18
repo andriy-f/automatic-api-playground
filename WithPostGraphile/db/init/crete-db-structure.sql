@@ -1,9 +1,15 @@
+create type kcm.contact_status as enum (
+  'active',
+  'archived',
+);
+
 create table kcm.contact (
   id               integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   first_name       text not null check (char_length(first_name) < 80),
   last_name        text check (char_length(last_name) < 80),
-  email            VARCHAR(255) NULL UNIQUE,
-  phone            VARCHAR(30) NULL UNIQUE, 
+  email            varchar(255) null unique,
+  phone            varchar(30) null unique, 
+  status           kcm.contact_status not null default 'active',
   userId           integer references kcm_private.users(id) on delete cascade,
   about            text,
   created_at       timestamp default now()
@@ -15,3 +21,9 @@ comment on column kcm.contact.first_name is 'The person’s first name.';
 comment on column kcm.contact.last_name is 'The person’s last name.';
 comment on column kcm.contact.about is 'A short description about the contact.';
 comment on column kcm.contact.created_at is 'The time this contact was created.';
+
+create function kcm.contact_full_name(contact kcm.contact) returns text as $$
+  select contact.first_name || ' ' || contact.last_name
+$$ language sql stable;
+
+comment on function kcm.contact_full_name(kcm.contact) is 'A contact’s full name which is a concatenation of their first and last name.';
