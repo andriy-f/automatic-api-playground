@@ -36,3 +36,11 @@ create function kcm.contact_full_name(contact kcm.contact) returns text as $$
 $$ language sql stable;
 
 comment on function kcm.contact_full_name(kcm.contact) is 'A contact’s full name which is a concatenation of their first and last name.';
+
+create function kcm.search_contacts(search text) returns setof kcm.contact as $$
+  select contact.*
+  from kcm.contact as contact
+  where position(lower(search) in lower(contact.first_name || ' ' || contact.last_name)) > 0 or position(search in contact.email) > 0
+$$ language sql stable;
+
+comment on function kcm.search_contacts(text) is 'Returns contacts containing a given search term.';
