@@ -1,6 +1,15 @@
+create schema kcm_private;
+
+CREATE TABLE kcm_private.users (
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    email VARCHAR(255) NOT NULL UNIQUE
+);
+
+create schema kcm;
+
 create type kcm.contact_status as enum (
   'active',
-  'archived',
+  'archived'
 );
 
 create table kcm.contact (
