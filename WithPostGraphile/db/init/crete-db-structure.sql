@@ -1,11 +1,23 @@
+create schema kcm;
 create schema kcm_private;
 
-CREATE TABLE kcm_private.users (
-    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    email VARCHAR(255) NOT NULL UNIQUE
+CREATE TABLE kcm.user (
+    id               integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    first_name       text not null check (char_length(first_name) < 80),
+    last_name        text check (char_length(last_name) < 80),
+    created_at       timestamp default now()
 );
 
-create schema kcm;
+create table kcm_private.user_account (
+  user_id        integer primary key references kcm.user(id) on delete cascade,
+  email            text not null unique check (email ~* '^.+@.+\..+$'),
+  password_hash    text not null
+);
+
+comment on table kcm_private.user_account is 'Private information about a user’s account.';
+comment on column kcm_private.user_account.user_id is 'The id of the user associated with this account.';
+comment on column kcm_private.user_account.email is 'The email address of the user.';
+comment on column kcm_private.user_account.password_hash is 'An opaque hash of the user’s password.';
 
 create type kcm.contact_status as enum (
   'active',
@@ -19,7 +31,7 @@ create table kcm.contact (
   email            varchar(255) null unique,
   phone            varchar(30) null unique, 
   status           kcm.contact_status not null default 'active',
-  userId           integer references kcm_private.users(id) on delete cascade,
+  userId           integer references kcm.user(id) on delete cascade,
   about            text,
   created_at       timestamp default now(),
   updated_at       timestamp default now()
