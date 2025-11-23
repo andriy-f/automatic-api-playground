@@ -21,7 +21,8 @@ create table kcm.contact (
   status           kcm.contact_status not null default 'active',
   userId           integer references kcm_private.users(id) on delete cascade,
   about            text,
-  created_at       timestamp default now()
+  created_at       timestamp default now(),
+  updated_at       timestamp default now()
 );
 
 comment on table kcm.contact is 'A contact record.';
@@ -44,3 +45,15 @@ create function kcm.search_contacts(search text) returns setof kcm.contact as $$
 $$ language sql stable;
 
 comment on function kcm.search_contacts(text) is 'Returns contacts containing a given search term.';
+
+create function kcm_private.set_updated_at() returns trigger as $$
+begin
+  new.updated_at := current_timestamp;
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger contact_updated_at before update
+  on kcm.contact
+  for each row
+  execute procedure kcm_private.set_updated_at();
