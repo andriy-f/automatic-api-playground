@@ -69,3 +69,27 @@ create trigger contact_updated_at before update
   on kcm.contact
   for each row
   execute procedure kcm_private.set_updated_at();
+
+-- Auth
+create extension if not exists "pgcrypto";
+
+create function kcm.register_user(
+  first_name text,
+  last_name text,
+  email text,
+  password text
+) returns kcm.user as $$
+declare temp_user kcm.user;
+begin
+  insert into kcm.user (first_name, last_name) values
+    (first_name, last_name)
+    returning * into temp_user;
+
+  insert into kcm_private.user_account (user_id, email, password_hash) values
+    (temp_user.id, email, crypt(password, gen_salt('bf')));
+
+  return temp_user;
+end;
+$$ language plpgsql strict security definer;
+
+comment on function kcm.register_user(text, text, text, text) is 'Registers a single user and creates an account.';
